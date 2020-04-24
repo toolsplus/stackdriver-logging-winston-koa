@@ -1,0 +1,84 @@
+{
+  "name": "stackdriver-logging-winston-koa",
+  "description": "Koa middleware for Winston transport to Stackdriver Logging",
+  "version": "0.0.0-development",
+  "license": "Apache-2.0",
+  "author": "Tobias Binna",
+  "engines": {
+    "node": ">=8.10.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/toolsplus/stackdriver-logging-winston-koa"
+  },
+  "main": "./build/src/index.js",
+  "types": "./build/src/index.d.ts",
+  "files": [
+    "build/src",
+    "!build/src/**/*.map"
+  ],
+  "scripts": {
+    "commit": "git-cz",
+    "build": "tsc -p .",
+    "test": "nyc mocha --recursive build/test",
+    "system-test": "mocha build/system-test --timeout 600000",
+    "codecov": "nyc report --reporter=json && codecov -f .coverage/*.json",
+    "semantic-release": "semantic-release",
+    "snyk-protect": "snyk protect",
+    "prepare": "npm run snyk-protect"
+  },
+  "keywords": [
+    "google apis client",
+    "google api client",
+    "google apis",
+    "google api",
+    "google",
+    "google cloud platform",
+    "google cloud",
+    "cloud",
+    "google logging",
+    "logging",
+    "stackdriver logging",
+    "stackdriver",
+    "winston transport",
+    "winston",
+    "koa"
+  ],
+  "devDependencies": {
+    "@types/koa": "^2.0.49",
+    "@types/mocha": "^7.0.2",
+    "@types/node": "^12.7.2",
+    "@types/proxyquire": "^1.3.28",
+    "@types/request": "^2.48.2",
+    "@types/uuid": "^7.0.3",
+    "codecov": "^3.6.5",
+    "commitizen": "^4.0.4",
+    "cz-conventional-changelog": "^3.0.2",
+    "delay": "^4.3.0",
+    "gts": "^1.1.0",
+    "koa": "^2.7.0",
+    "mocha": "^7.1.1",
+    "nyc": "^15.0.1",
+    "proxyquire": "^2.1.3",
+    "semantic-release": "^15.13.21",
+    "snyk": "^1.310.0",
+    "typescript": "^3.5.3",
+    "uuid": "^7.0.3",
+    "winston": "^3.2.1"
+  },
+  "dependencies": {
+    "@google-cloud/logging": "^7.3.0",
+    "@google-cloud/logging-winston": "^3.0.6",
+    "source-map-support": "^0.5.13",
+    "winston-transport": "^4.3.0"
+  },
+  "peerDependencies": {
+    "winston": ">=3.2.1"
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
+  },
+  "snyk": true
+}
