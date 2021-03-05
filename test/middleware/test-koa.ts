@@ -5,8 +5,8 @@ import * as proxyquire from "proxyquire";
 
 import * as Koa from "koa";
 import {ParameterizedContext} from "koa";
+import {Options} from "@google-cloud/logging-winston";
 import {AnnotatedContextType} from "../../src/middleware/common/make-middleware";
-import * as types from "@google-cloud/logging-winston/build/src/types/core";
 import * as TransportStream from 'winston-transport';
 import {LogEntry} from "winston";
 import * as winston from "winston";
@@ -18,14 +18,14 @@ const FAKE_GENERATED_MIDDLEWARE = async () => {
 const FAKE_ENVIRONMENT = "FAKE_ENVIRONMENT";
 
 let authEnvironment: string;
-let passedOptions: Array<types.Options | undefined>;
+let passedOptions: Array<Options | undefined>;
 let transport: TransportStream | undefined;
 
 class FakeLoggingWinston extends TransportStream {
     // tslint:disable-next-line:no-any Doing "just enough" faking.
     common: any;
 
-    constructor(options: types.Options) {
+    constructor(options: Options) {
         super(options);
         transport = this;
         passedOptions.push(options);

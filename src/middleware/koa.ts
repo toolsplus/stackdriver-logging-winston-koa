@@ -6,8 +6,7 @@ import {GCPEnv} from "google-auth-library";
 import {HttpRequest, Log} from "@google-cloud/logging";
 import * as winston from "winston";
 
-import * as types from "@google-cloud/logging-winston/build/src/types/core";
-import {LOGGING_TRACE_KEY, LoggingWinston} from "@google-cloud/logging-winston";
+import {LOGGING_TRACE_KEY, LoggingWinston, Options} from "@google-cloud/logging-winston";
 import {AnnotatedContextType, makeMiddleware as makeCommonMiddleware} from "./common/make-middleware";
 import * as Koa from "koa";
 import {ParameterizedContext} from "koa";
@@ -22,22 +21,30 @@ export async function makeMiddleware(
 ): Promise<Middleware>;
 export async function makeMiddleware(
     logger: winston.Logger,
-    options?: types.Options
+    options?: Options
 ): Promise<Middleware>;
 export async function makeMiddleware(
     logger: winston.Logger,
-    optionsOrTransport?: types.Options | LoggingWinston
+    optionsOrTransport?: Options | LoggingWinston
 ): Promise<Middleware> {
     let transport: LoggingWinston;
 
-    // If a transport was not provided, instantiate one.
-    if (!(optionsOrTransport instanceof LoggingWinston)) {
-        const options = {logName: 'winston_log', ...optionsOrTransport};
+    // If no custom transports are provided, use default or instantiate one.
+    const cloudTransport = logger.transports.find(
+        t => t instanceof LoggingWinston
+    );
 
+    // If user provides a custom transport, always add it to the logger.
+    if (optionsOrTransport instanceof LoggingWinston) {
+        transport = optionsOrTransport;
+        logger.add(transport);
+    } else if (cloudTransport && !optionsOrTransport) {
+        // Check if logger already contains a Cloud transport
+        transport = cloudTransport as LoggingWinston;
+    } else {
+        const options = {logName: 'winston_log', ...optionsOrTransport};
         transport = new LoggingWinston(options);
         logger.add(transport);
-    } else {
-        transport = optionsOrTransport;
     }
 
     const auth = transport.common.stackdriverLog.logging.auth;

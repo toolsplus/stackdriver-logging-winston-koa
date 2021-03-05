@@ -37,7 +37,7 @@ describe("koa middleware", () => {
 
     describe("request logging middleware", () => {
         it('should write request correlated log entries', () => {
-            return new Promise(async resolve => {
+            return new Promise<void>(async resolve => {
                 const logger = winston.createLogger();
                 const mw = await klw.makeMiddleware(logger, {
                     logName: LOG_NAME,
