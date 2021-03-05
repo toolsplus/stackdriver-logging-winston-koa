@@ -5,7 +5,7 @@
   "license": "Apache-2.0",
   "author": "Tobias Binna",
   "engines": {
-    "node": ">=8.10.0"
+    "node": ">=10"
   },
   "repository": {
     "type": "git",
@@ -46,29 +46,29 @@
   ],
   "devDependencies": {
     "@types/koa": "^2.0.49",
-    "@types/mocha": "^7.0.2",
-    "@types/node": "^12.7.2",
+    "@types/mocha": "^8.2.1",
+    "@types/node": "^14.14.31",
     "@types/proxyquire": "^1.3.28",
     "@types/request": "^2.48.2",
-    "@types/uuid": "^7.0.3",
+    "@types/uuid": "^8.3.0",
     "codecov": "^3.6.5",
     "commitizen": "^4.0.4",
     "cz-conventional-changelog": "^3.0.2",
-    "delay": "^4.3.0",
-    "gts": "^1.1.0",
+    "delay": "^5.0.0",
+    "gts": "^3.1.0",
     "koa": "^2.7.0",
-    "mocha": "^7.1.1",
+    "mocha": "^8.3.0",
     "nyc": "^15.0.1",
     "proxyquire": "^2.1.3",
     "semantic-release": "^17.0.7",
     "snyk": "^1.310.0",
-    "typescript": "^3.5.3",
-    "uuid": "^7.0.3",
+    "typescript": "^4.2.3",
+    "uuid": "^8.3.2",
     "winston": "^3.2.1"
   },
   "dependencies": {
-    "@google-cloud/logging": "^7.3.0",
-    "@google-cloud/logging-winston": "^3.0.6",
+    "@google-cloud/logging": "^9.1.0",
+    "@google-cloud/logging-winston": "^4.0.4",
     "source-map-support": "^0.5.13",
     "winston-transport": "^4.3.0"
   },
