@@ -1,6 +1,6 @@
 # stackdriver-logging-winston-koa
 
-[![Build Status](https://travis-ci.org/toolsplus/stackdriver-logging-winston-koa.svg?branch=master)](https://travis-ci.org/toolsplus/stackdriver-logging-winston-koa)
+[![Build Status](https://travis-ci.com/toolsplus/stackdriver-logging-winston-koa.svg?branch=master)](https://travis-ci.com/toolsplus/stackdriver-logging-winston-koa)
 [![npm version](https://badge.fury.io/js/stackdriver-logging-winston-koa.svg)](https://badge.fury.io/js/stackdriver-logging-winston-koa)
 [![codecov](https://codecov.io/gh/toolsplus/stackdriver-logging-winston-koa/branch/master/graph/badge.svg)](https://codecov.io/gh/toolsplus/stackdriver-logging-winston-koa)
 
