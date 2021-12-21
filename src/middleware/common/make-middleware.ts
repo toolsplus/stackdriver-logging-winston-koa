@@ -2,14 +2,14 @@
  * Adapted from:
  * https://github.com/googleapis/nodejs-logging/blob/master/src/middleware/express/make-middleware.ts
  */
-import * as Koa from "koa";
-import {ParameterizedContext} from "koa";
-import {HttpRequest} from "@google-cloud/logging";
-import {getOrInjectContext, makeHeaderWrapper} from "./context";
-import {makeHttpRequestData} from "./make-http-request";
+import * as Koa from 'koa';
+import {DefaultState, ParameterizedContext} from 'koa';
+import {HttpRequest} from '@google-cloud/logging';
+import {getOrInjectContext} from './context';
+import {makeHttpRequestData} from './make-http-request';
 
 export interface AnnotatedContextType<LoggerType> {
-    log: LoggerType;
+  log: LoggerType;
 }
 
 /**
@@ -29,28 +29,49 @@ export interface AnnotatedContextType<LoggerType> {
  * request log.
  */
 export function makeMiddleware<LoggerType>(
-    projectId: string,
-    makeChildLogger: (trace: string) => LoggerType,
-    emitRequestLog?: (httpRequest: HttpRequest, trace: string) => void
-): Koa.Middleware<any, ParameterizedContext<AnnotatedContextType<LoggerType>>> {
-    return async (ctx, next) => {
-        const requestStartMs = Date.now();
+  projectId: string,
+  makeChildLogger: (
+    trace: string,
+    span?: string,
+    traceSampled?: boolean
+  ) => LoggerType,
+  emitRequestLog?: (
+    httpRequest: HttpRequest,
+    trace: string,
+    span?: string,
+    traceSampled?: boolean
+  ) => void
+): Koa.Middleware<
+  DefaultState,
+  ParameterizedContext<AnnotatedContextType<LoggerType>>
+> {
+  return async (ctx, next) => {
+    const requestStartMs = Date.now();
 
-        const wrapper = makeHeaderWrapper(ctx.req);
+    // Detect & establish context if we were the first actor to detect lack of
+    // context so traceContext is always available when using middleware.
+    const traceContext = getOrInjectContext(ctx.req, projectId, true);
 
-        const spanContext = getOrInjectContext(wrapper);
-        const trace = `projects/${projectId}/traces/${spanContext.traceId}`;
+    // Install a child logger on the context object, with detected trace and
+    // span.
+    ctx.log = makeChildLogger(
+      traceContext.trace,
+      traceContext.spanId,
+      traceContext.traceSampled
+    );
 
-        // Install a child logger on the context object.
-        ctx.log = makeChildLogger(trace);
+    await next();
 
-        await next();
-
-        if (emitRequestLog) {
-            // Emit a 'Request Log' on the parent logger.
-            const latencyMs = Date.now() - requestStartMs;
-            const httpRequest = makeHttpRequestData(ctx, latencyMs);
-            emitRequestLog(httpRequest, trace);
-        }
-    };
+    if (emitRequestLog) {
+      // Emit a 'Request Log' on the parent logger.
+      const latencyMs = Date.now() - requestStartMs;
+      const httpRequest = makeHttpRequestData(ctx, latencyMs);
+      emitRequestLog(
+        httpRequest,
+        traceContext.trace,
+        traceContext.spanId,
+        traceContext.traceSampled
+      );
+    }
+  };
 }
