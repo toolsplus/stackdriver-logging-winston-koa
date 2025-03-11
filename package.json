@@ -5,7 +5,7 @@
   "license": "Apache-2.0",
   "author": "Tobias Binna",
   "engines": {
-    "node": ">=10"
+    "node": ">=18"
   },
   "repository": {
     "type": "git",
@@ -22,10 +22,8 @@
     "build": "tsc -p .",
     "test": "nyc mocha --recursive build/test",
     "system-test": "mocha build/system-test --timeout 600000",
-    "codecov": "nyc report --reporter=json && codecov -f .coverage/*.json",
-    "semantic-release": "semantic-release",
-    "snyk-protect": "snyk protect",
-    "prepare": "npm run snyk-protect"
+    "coverage": "nyc report --reporter=json",
+    "semantic-release": "semantic-release"
   },
   "keywords": [
     "google apis client",
@@ -45,34 +43,29 @@
     "koa"
   ],
   "devDependencies": {
-    "@types/koa": "^2.0.49",
-    "@types/mocha": "^8.2.1",
-    "@types/node": "^14.14.31",
+    "@types/koa": "^2.15.0",
+    "@types/mocha": "^9.1.1",
+    "@types/node": "^22.13.10",
     "@types/proxyquire": "^1.3.28",
     "@types/request": "^2.48.2",
-    "@types/uuid": "^8.3.0",
-    "codecov": "^3.6.5",
     "commitizen": "^4.0.4",
     "cz-conventional-changelog": "^3.0.2",
-    "delay": "^5.0.0",
     "eslint": "^7.32.0",
-    "gts": "^3.1.0",
+    "gts": "^5.3.1",
     "koa": "^2.7.0",
-    "mocha": "^8.3.0",
+    "mocha": "^9.2.2",
     "nyc": "^15.0.1",
     "prettier": "^2.5.1",
     "proxyquire": "^2.1.3",
     "semantic-release": "^17.0.7",
-    "snyk": "^1.310.0",
-    "typescript": "^4.2.3",
-    "uuid": "^8.3.2",
+    "typescript": "^5.8.2",
+    "uuid": "^11.1.0",
     "winston": "^3.2.1"
   },
   "dependencies": {
-    "@google-cloud/logging": "^9.6.4",
-    "@google-cloud/logging-winston": "^4.1.1",
-    "google-auth-library": "^7.11.0",
-    "source-map-support": "^0.5.13",
+    "@google-cloud/logging": "^11.2.0",
+    "@google-cloud/logging-winston": "^6.0.0",
+    "google-auth-library": "^9.15.1",
     "winston-transport": "^4.3.0"
   },
   "peerDependencies": {
@@ -82,6 +75,5 @@
     "commitizen": {
       "path": "./node_modules/cz-conventional-changelog"
     }
-  },
-  "snyk": true
+  }
 }
