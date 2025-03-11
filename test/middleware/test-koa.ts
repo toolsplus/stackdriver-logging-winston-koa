@@ -29,7 +29,7 @@ class FakeLoggingWinston extends TransportStream {
     transport = this;
     passedOptions.push(options);
     this.common = {
-      stackdriverLog: {
+      cloudLog: {
         logging: {
           auth: {
             async getProjectId() {
@@ -52,14 +52,11 @@ class FakeLoggingWinston extends TransportStream {
 let passedProjectId: string | undefined;
 let passedEmitRequestLog: Function | undefined;
 
-function fakeMakeMiddleware<LoggerType>(
+function fakeMakeMiddleware(
   projectId: string,
   makeChildLogger: Function,
   emitRequestLog: Function
-): Koa.Middleware<
-  DefaultState,
-  ParameterizedContext<AnnotatedContextType<LoggerType>>
-> {
+): Koa.Middleware<DefaultState, ParameterizedContext<AnnotatedContextType>> {
   passedProjectId = projectId;
   passedEmitRequestLog = emitRequestLog;
   return FAKE_GENERATED_MIDDLEWARE;

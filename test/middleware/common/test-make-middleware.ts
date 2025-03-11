@@ -26,7 +26,7 @@ describe('middleware/koa/make-middleware', () => {
   describe('makeMiddleware', () => {
     const {makeMiddleware} = proxyquire(
       '../../../src/middleware/common/make-middleware',
-      {'./context': FAKE_CONTEXT}
+      {'@google-cloud/logging/build/src/utils/context': FAKE_CONTEXT}
     );
 
     it('should return a function accepting 2 arguments', () => {

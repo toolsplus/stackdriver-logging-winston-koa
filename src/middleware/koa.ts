@@ -3,43 +3,36 @@
  * https://github.com/googleapis/nodejs-logging-winston/blob/main/src/middleware/express.ts
  */
 import {GCPEnv} from 'google-auth-library';
-import {HttpRequest, Log} from '@google-cloud/logging';
+import {HttpRequest, Log, LogSync} from '@google-cloud/logging';
 import * as winston from 'winston';
 
 import {
-  LOGGING_TRACE_KEY,
-  LOGGING_SPAN_KEY,
   LOGGING_SAMPLED_KEY,
+  LOGGING_SPAN_KEY,
+  LOGGING_TRACE_KEY,
   LoggingWinston,
   Options,
 } from '@google-cloud/logging-winston';
-import {
-  AnnotatedContextType,
-  makeMiddleware as makeCommonMiddleware,
-} from './common/make-middleware';
-import * as Koa from 'koa';
-import {DefaultState, ParameterizedContext} from 'koa';
+import {makeMiddleware as makeCommonMiddleware} from './common/make-middleware';
 
 export const REQUEST_LOG_SUFFIX = '_reqlog';
 
-type Middleware = ReturnType<
-  Koa.Middleware<
-    DefaultState,
-    ParameterizedContext<AnnotatedContextType<typeof makeCommonMiddleware>>
-  >
->;
+type Middleware = ReturnType<typeof makeCommonMiddleware>;
 
 export async function makeMiddleware(
   logger: winston.Logger,
-  transport: LoggingWinston
+  transport: LoggingWinston,
+  skipParentEntryForCloudRun?: boolean
 ): Promise<Middleware>;
 export async function makeMiddleware(
   logger: winston.Logger,
-  options?: Options
+  options?: Options,
+  skipParentEntryForCloudRun?: boolean
 ): Promise<Middleware>;
 export async function makeMiddleware(
   logger: winston.Logger,
-  optionsOrTransport?: Options | LoggingWinston
+  optionsOrTransport?: Options | LoggingWinston,
+  skipParentEntryForCloudRun?: boolean
 ): Promise<Middleware> {
   let transport: LoggingWinston;
 
@@ -54,14 +47,18 @@ export async function makeMiddleware(
     logger.add(transport);
   } else if (cloudTransport && !optionsOrTransport) {
     // Check if logger already contains a Cloud transport
-    transport = cloudTransport as LoggingWinston;
+    transport = cloudTransport;
   } else {
     const options = {logName: 'winston_log', ...optionsOrTransport};
     transport = new LoggingWinston(options);
     logger.add(transport);
   }
 
-  const auth = transport.common.stackdriverLog.logging.auth;
+  const auth = (
+    transport.common.redirectToStdout
+      ? (transport.common.cloudLog as LogSync)
+      : (transport.common.cloudLog as Log)
+  ).logging.auth;
   const [env, projectId] = await Promise.all([
     auth.getEnv(),
     auth.getProjectId(),
@@ -71,8 +68,15 @@ export async function makeMiddleware(
   // parent request log entry that all the request specific logs ("app logs")
   // will nest under. GAE and GCF generate the parent request logs
   // automatically.
+  // Cloud Run also generates the parent request log automatically, but skipping
+  // the parent request entry has to be explicity enabled until the next major
+  // release in which we can change the default behavior.
   let emitRequestLogEntry;
-  if (env !== GCPEnv.APP_ENGINE && env !== GCPEnv.CLOUD_FUNCTIONS) {
+  if (
+    env !== GCPEnv.APP_ENGINE &&
+    env !== GCPEnv.CLOUD_FUNCTIONS &&
+    (env !== GCPEnv.CLOUD_RUN || !skipParentEntryForCloudRun)
+  ) {
     const requestLogName = Log.formatName_(
       projectId,
       `${transport.common.logName}${REQUEST_LOG_SUFFIX}`
