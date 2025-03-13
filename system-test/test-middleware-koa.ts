@@ -11,7 +11,7 @@ import {Entry, Logging} from '@google-cloud/logging';
 const logging = new Logging();
 
 const WRITE_CONSISTENCY_DELAY_MS = 20 * 1000;
-const TEST_TIMEOUT = WRITE_CONSISTENCY_DELAY_MS + 10 * 1000;
+const TEST_TIMEOUT = 10 * 1000;
 const LOG_NAME = `winston-system-test-${uuid.v4()}`;
 
 function delay(ms: number) {
@@ -21,7 +21,7 @@ function delay(ms: number) {
 describe('koa middleware', () => {
   describe('global logger', () => {
     it('should properly write log entries', async function () {
-      this.timeout(TEST_TIMEOUT);
+      this.timeout(TEST_TIMEOUT + WRITE_CONSISTENCY_DELAY_MS);
       const logger = winston.createLogger();
       await klw.makeMiddleware(logger, {
         logName: LOG_NAME,
@@ -42,7 +42,10 @@ describe('koa middleware', () => {
 
   describe('request logging middleware', () => {
     it('should write request correlated log entries', async function () {
-      this.timeout(TEST_TIMEOUT);
+      const N_LOG_WRITE_CALLS = 2;
+      this.timeout(
+        TEST_TIMEOUT + N_LOG_WRITE_CALLS * WRITE_CONSISTENCY_DELAY_MS
+      );
       const logger = winston.createLogger();
       const mw = await klw.makeMiddleware(logger, {
         logName: LOG_NAME,
@@ -93,12 +96,11 @@ describe('koa middleware', () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await mw(fakeContext as any, next);
 
+      await delay(WRITE_CONSISTENCY_DELAY_MS);
+
       const requestLog = logging.log(`${LOG_NAME}${REQUEST_LOG_SUFFIX}`);
-      const requestLogEntries = (
-        await requestLog.getEntries({
-          pageSize: 1,
-        })
-      )[0];
+      const [requestLogEntries, reqLogReq, reqLogRes] =
+        await requestLog.getEntries({pageSize: 1});
       assert.strictEqual(requestLogEntries.length, 1);
       const [requestLogEntry] = requestLogEntries;
       assert.strictEqual(
